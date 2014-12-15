@@ -37,15 +37,15 @@ namespace IfClauseDiagnostic
             var diagnosticSpan = diagnostic.Location.SourceSpan;
 
             // Find the type declaration identified by the diagnostic.
-            var declaration = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<TypeDeclarationSyntax>().First();
+            var statement = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<ExpressionStatementSyntax>().First();
 
             // Register a code action that will invoke the fix.
             context.RegisterFix(
-                CodeAction.Create("Make uppercase", c => MakeUppercaseAsync(context.Document, declaration, c)),
+                CodeAction.Create("Make Block", c => MakeBlockAsync(context.Document, statement, c)),
                 diagnostic);
         }
 
-        private async Task<Solution> MakeUppercaseAsync(Document document, TypeDeclarationSyntax typeDecl, CancellationToken cancellationToken)
+        private async Task<Solution> MakeBlockAsync(Document document, ExpressionStatementSyntax typeDecl, CancellationToken cancellationToken)
         {
             // Compute new uppercase name.
             var identifierToken = typeDecl.Identifier;
