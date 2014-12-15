@@ -32,7 +32,6 @@ namespace IfClauseDiagnostic
         {
             var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
 
-            // TODO: Replace the following code with your own analysis, generating a CodeAction for each fix to suggest
             var diagnostic = context.Diagnostics.First();
             var diagnosticSpan = diagnostic.Location.SourceSpan;
 
@@ -45,23 +44,27 @@ namespace IfClauseDiagnostic
                 diagnostic);
         }
 
-        private async Task<Solution> MakeBlockAsync(Document document, ExpressionStatementSyntax typeDecl, CancellationToken cancellationToken)
+        private async Task<Document> MakeBlockAsync(Document document, ExpressionStatementSyntax trueStatement, CancellationToken cancellationToken)
         {
-            // Compute new uppercase name.
-            var identifierToken = typeDecl.Identifier;
-            var newName = identifierToken.Text.ToUpperInvariant();
+            var leading = trueStatement.GetLeadingTrivia();
+            var leadingEol = SyntaxFactory.EndOfLine("\r\n");
+            var newLeading = leading.Insert(0, leadingEol);
 
-            // Get the symbol representing the type to be renamed.
-            var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
-            var typeSymbol = semanticModel.GetDeclaredSymbol(typeDecl, cancellationToken);
+            var block = SyntaxFactory.Block(trueStatement.WithLeadingTrivia(newLeading));
 
-            // Produce a new solution that has all references to that type renamed, including the declaration.
-            var originalSolution = document.Project.Solution;
-            var optionSet = originalSolution.Workspace.Options;
-            var newSolution = await Renamer.RenameSymbolAsync(document.Project.Solution, typeSymbol, newName, optionSet, cancellationToken).ConfigureAwait(false);
+            var ifLeadingWhiteSpace = trueStatement.Parent.GetLeadingTrivia().Where(t => t.CSharpKind() == SyntaxKind.WhitespaceTrivia).First();
+            block = block.WithLeadingTrivia(ifLeadingWhiteSpace);
+            var newClosing = block.CloseBraceToken.WithLeadingTrivia(ifLeadingWhiteSpace);
+            var statements = new SyntaxList<StatementSyntax>();
+            statements = statements.Add(trueStatement.WithLeadingTrivia(newLeading));
+            block = SyntaxFactory.Block(block.OpenBraceToken, statements, newClosing);
 
-            // Return the new solution with the now-uppercase type name.
-            return newSolution;
+            var root = await document.GetSyntaxRootAsync();
+
+            var newRoot = root.ReplaceNode((SyntaxNode)trueStatement, block);
+
+            var newDocument = document.WithSyntaxRoot(newRoot);
+            return newDocument;
         }
     }
 }
