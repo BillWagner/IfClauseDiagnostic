@@ -44,20 +44,25 @@ namespace IfClauseDiagnostic
                 diagnostic);
         }
 
-        private async Task<Document> MakeBlockAsync(Document document, ExpressionStatementSyntax trueStatement, CancellationToken cancellationToken)
+        private async Task<Document> MakeBlockAsync(Document document, ExpressionStatementSyntax trueStatement, 
+            CancellationToken cancellationToken)
         {
-            var leading = trueStatement.GetLeadingTrivia();
-            var leadingEol = SyntaxFactory.EndOfLine("\r\n");
-            var newLeading = leading.Insert(0, leadingEol);
+            var statementLeadingTrivia = trueStatement.GetLeadingTrivia();
+            var statementLeadingWhiteSpace = trueStatement.Parent.GetLeadingTrivia()
+                .Where(t => t.CSharpKind() == SyntaxKind.WhitespaceTrivia).Single();
+            var endOfLineTrivia = SyntaxFactory.EndOfLine("\r\n");
+            var blockLeadingTrivia = statementLeadingTrivia.Insert(0, endOfLineTrivia);
 
-            var block = SyntaxFactory.Block(trueStatement.WithLeadingTrivia(newLeading));
-
-            var ifLeadingWhiteSpace = trueStatement.Parent.GetLeadingTrivia().Where(t => t.CSharpKind() == SyntaxKind.WhitespaceTrivia).First();
-            block = block.WithLeadingTrivia(ifLeadingWhiteSpace);
-            var newClosing = block.CloseBraceToken.WithLeadingTrivia(ifLeadingWhiteSpace);
             var statements = new SyntaxList<StatementSyntax>();
-            statements = statements.Add(trueStatement.WithLeadingTrivia(newLeading));
-            block = SyntaxFactory.Block(block.OpenBraceToken, statements, newClosing);
+            statements = statements.Add(trueStatement.WithLeadingTrivia(blockLeadingTrivia));
+
+            var block = SyntaxFactory.Block(statements);
+
+            block = block.WithLeadingTrivia(statementLeadingWhiteSpace);
+
+            var closingTokenWithTrivia = block.CloseBraceToken.WithLeadingTrivia(statementLeadingWhiteSpace);
+
+            block = SyntaxFactory.Block(block.OpenBraceToken, statements, closingTokenWithTrivia);
 
             var root = await document.GetSyntaxRootAsync();
 
