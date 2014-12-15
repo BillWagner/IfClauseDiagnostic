@@ -56,13 +56,10 @@ namespace IfClauseDiagnostic
             var statements = new SyntaxList<StatementSyntax>();
             statements = statements.Add(trueStatement.WithLeadingTrivia(blockLeadingTrivia));
 
-            var block = SyntaxFactory.Block(statements);
+            var openingTokenWithTrivia = SyntaxFactory.Token(SyntaxKind.OpenBraceToken).WithLeadingTrivia(statementLeadingWhiteSpace);
+            var closingTokenWithTrivia = SyntaxFactory.Token(SyntaxKind.CloseBraceToken).WithLeadingTrivia(statementLeadingWhiteSpace);
 
-            block = block.WithLeadingTrivia(statementLeadingWhiteSpace);
-
-            var closingTokenWithTrivia = block.CloseBraceToken.WithLeadingTrivia(statementLeadingWhiteSpace);
-
-            block = SyntaxFactory.Block(block.OpenBraceToken, statements, closingTokenWithTrivia);
+            var block = SyntaxFactory.Block(openingTokenWithTrivia, statements, closingTokenWithTrivia);
 
             var root = await document.GetSyntaxRootAsync();
 
