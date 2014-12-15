@@ -47,11 +47,13 @@ namespace IfClauseDiagnostic
         private async Task<Document> MakeBlockAsync(Document document, ExpressionStatementSyntax trueStatement, 
             CancellationToken cancellationToken)
         {
+            // Create the important trivia that we need.
             var statementLeadingTrivia = trueStatement.GetLeadingTrivia();
             var statementLeadingWhiteSpace = trueStatement.Parent.GetLeadingTrivia()
                 .Where(t => t.CSharpKind() == SyntaxKind.WhitespaceTrivia).Single();
             var endOfLineTrivia = SyntaxFactory.EndOfLine("\r\n");
             var blockLeadingTrivia = statementLeadingTrivia.Insert(0, endOfLineTrivia);
+
 
             var statements = new SyntaxList<StatementSyntax>();
             statements = statements.Add(trueStatement.WithLeadingTrivia(blockLeadingTrivia));
@@ -62,7 +64,6 @@ namespace IfClauseDiagnostic
             var block = SyntaxFactory.Block(openingTokenWithTrivia, statements, closingTokenWithTrivia);
 
             var root = await document.GetSyntaxRootAsync();
-
             var newRoot = root.ReplaceNode((SyntaxNode)trueStatement, block);
 
             var newDocument = document.WithSyntaxRoot(newRoot);
