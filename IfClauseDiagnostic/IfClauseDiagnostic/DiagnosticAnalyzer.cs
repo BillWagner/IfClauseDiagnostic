@@ -14,11 +14,11 @@ namespace IfClauseDiagnostic
     public class IfClauseDiagnosticAnalyzer : DiagnosticAnalyzer
     {
         public const string DiagnosticId = "IfClauseDiagnostic";
-        internal const string Title = "Type name contains lowercase letters";
-        internal const string MessageFormat = "Type name '{0}' contains lowercase letters";
+        internal const string Title = "If clauses must be surrounded by braces";
+        internal const string MessageFormat = "The {0} is not surrounded by braces.";
         internal const string Category = "Naming";
 
-        internal static DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true);
+        internal static DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Info, isEnabledByDefault: true);
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return ImmutableArray.Create(Rule); } }
 
@@ -29,8 +29,16 @@ namespace IfClauseDiagnostic
 
         private static void AnalyzeIfBlock(SyntaxNodeAnalysisContext context)
         {
-            // TODO: Replace the following code with your own analysis, generating Diagnostic objects for any issues you find
-            var statement = context.Node;
+            var statement = context.Node as IfStatementSyntax;
+
+            var thenClause = statement.Statement;
+
+            if (thenClause is ExpressionStatementSyntax)
+            {
+                // create the diagnostic:
+                var diagnostic = Diagnostic.Create(Rule, statement.GetLocation(), "true clause");
+                context.ReportDiagnostic(diagnostic);
+            }
         }
     }
 }

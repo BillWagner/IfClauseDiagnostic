@@ -49,11 +49,11 @@ namespace SampleCode
             var expected = new DiagnosticResult
             {
                 Id = IfClauseDiagnosticAnalyzer.DiagnosticId,
-                Message = "if clauses should be surrounded by braces.",
+                Message = "The true clause is not surrounded by braces.",
                 Severity = DiagnosticSeverity.Info,
                 Locations =
                     new[] {
-                            new DiagnosticResultLocation("Test0.cs", 11, 15)
+                            new DiagnosticResultLocation("Test0.cs", 16, 13)
                         }
             };
 
