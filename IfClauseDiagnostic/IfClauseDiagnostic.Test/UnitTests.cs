@@ -84,6 +84,35 @@ namespace SampleCode
             VerifyCSharpFix(test, fixtest);
         }
 
+        //Diagnostic finds already corrected code.
+        [TestMethod]
+        public void IfStatementWithBraces()
+        {
+            var test = @"
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SampleCode
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            bool b2 = true;
+
+            if (b2)
+            {
+                Console.WriteLine(""b2"");
+            }
+        }
+    }
+}";
+            VerifyCSharpDiagnostic(test);
+        }
+
         protected override CodeFixProvider GetCSharpCodeFixProvider()
         {
             return new IfClauseDiagnosticCodeFixProvider();
