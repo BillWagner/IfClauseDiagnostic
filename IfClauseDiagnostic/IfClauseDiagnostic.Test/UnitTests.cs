@@ -326,6 +326,39 @@ namespace SampleCode
             VerifyCSharpFix(test, fixtest);
         }
 
+        //Diagnostic finds already corrected code.
+        [TestMethod]
+        public void IfElseStatementWithBraces()
+        {
+            var test = @"
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SampleCode
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            bool b6 = true;
+
+            if (b6)
+            {
+                Console.WriteLine(""b6"");
+            }
+            else
+            {
+                Console.WriteLine(""not b6"");
+            }
+        }
+    }
+}";
+            VerifyCSharpDiagnostic(test);
+        }
+
         protected override CodeFixProvider GetCSharpCodeFixProvider()
         {
             return new IfClauseDiagnosticCodeFixProvider();
