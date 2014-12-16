@@ -138,7 +138,7 @@ namespace SampleCode
         }
     }
 }";
-            var expected = new DiagnosticResult
+            var expectedTrue = new DiagnosticResult
             {
                 Id = IfClauseDiagnosticAnalyzer.DiagnosticId,
                 Message = "The true clause is not surrounded by braces.",
@@ -148,8 +148,18 @@ namespace SampleCode
                             new DiagnosticResultLocation("Test0.cs", 17, 17)
                         }
             };
+            var expectedFalse = new DiagnosticResult
+            {
+                Id = IfClauseDiagnosticAnalyzer.DiagnosticId,
+                Message = "The false (else) clause is not surrounded by braces.",
+                Severity = DiagnosticSeverity.Info,
+                Locations =
+                    new[] {
+                            new DiagnosticResultLocation("Test0.cs", 19, 17)
+                        }
+            };
 
-            VerifyCSharpDiagnostic(test, expected);
+            VerifyCSharpDiagnostic(test, expectedTrue, expectedFalse);
 
             var fixtest = @"
 using System;
