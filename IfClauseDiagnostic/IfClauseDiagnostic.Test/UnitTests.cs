@@ -258,6 +258,74 @@ namespace SampleCode
             VerifyCSharpFix(test, fixtest);
         }
 
+        [TestMethod]
+        public void IfWithoutBracesElseStatementWithBraces()
+        {
+            var test = @"
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SampleCode
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            bool b5 = true;
+
+            if (b5)
+                Console.WriteLine(""b5"");
+            else
+            {
+                Console.WriteLine(""not b5"");
+            }
+        }
+    }
+}";
+            var expectedTrue = new DiagnosticResult
+            {
+                Id = IfClauseDiagnosticAnalyzer.DiagnosticId,
+                Message = "The true clause is not surrounded by braces.",
+                Severity = DiagnosticSeverity.Info,
+                Locations =
+                    new[] {
+                            new DiagnosticResultLocation("Test0.cs", 17, 17)
+                        }
+            };
+            VerifyCSharpDiagnostic(test, expectedTrue);
+
+            var fixtest = @"
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SampleCode
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            bool b5 = true;
+
+            if (b5)
+            {
+                Console.WriteLine(""b5"");
+            }
+            else
+            {
+                Console.WriteLine(""not b5"");
+            }
+        }
+    }
+}";
+            VerifyCSharpFix(test, fixtest);
+        }
+
         protected override CodeFixProvider GetCSharpCodeFixProvider()
         {
             return new IfClauseDiagnosticCodeFixProvider();
