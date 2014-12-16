@@ -54,15 +54,17 @@ namespace IfClauseDiagnostic
             var endOfLineTrivia = SyntaxFactory.EndOfLine("\r\n");
             var blockLeadingTrivia = statementLeadingTrivia.Insert(0, endOfLineTrivia);
 
-
+            // Create the statements that go in the block:
             var statements = new SyntaxList<StatementSyntax>();
             statements = statements.Add(trueStatement.WithLeadingTrivia(blockLeadingTrivia));
 
+            // Create the brace tokens (with whitespace trivia) and the the block:
             var openingTokenWithTrivia = SyntaxFactory.Token(SyntaxKind.OpenBraceToken).WithLeadingTrivia(statementLeadingWhiteSpace);
             var closingTokenWithTrivia = SyntaxFactory.Token(SyntaxKind.CloseBraceToken).WithLeadingTrivia(statementLeadingWhiteSpace);
 
             var block = SyntaxFactory.Block(openingTokenWithTrivia, statements, closingTokenWithTrivia);
-
+            
+            // Replace the old statement with the block:
             var root = await document.GetSyntaxRootAsync();
             var newRoot = root.ReplaceNode((SyntaxNode)trueStatement, block);
 
