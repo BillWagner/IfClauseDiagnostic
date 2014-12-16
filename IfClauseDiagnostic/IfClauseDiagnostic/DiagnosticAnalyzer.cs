@@ -36,7 +36,7 @@ namespace IfClauseDiagnostic
             if (thenClause is ExpressionStatementSyntax)
             {
                 // create the diagnostic:
-                var diagnostic = Diagnostic.Create(Rule, statement.GetLocation(), "true clause");
+                var diagnostic = Diagnostic.Create(Rule, thenClause.GetLocation(), "true clause");
                 context.ReportDiagnostic(diagnostic);
             }
         }

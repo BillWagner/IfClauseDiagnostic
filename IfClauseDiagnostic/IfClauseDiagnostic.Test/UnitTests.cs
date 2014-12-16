@@ -53,7 +53,7 @@ namespace SampleCode
                 Severity = DiagnosticSeverity.Info,
                 Locations =
                     new[] {
-                            new DiagnosticResultLocation("Test0.cs", 16, 13)
+                            new DiagnosticResultLocation("Test0.cs", 17, 17)
                         }
             };
 

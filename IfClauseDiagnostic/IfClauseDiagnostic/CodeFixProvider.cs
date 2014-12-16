@@ -45,23 +45,17 @@ namespace IfClauseDiagnostic
                 diagnostic);
         }
 
-        private async Task<Solution> MakeBlockAsync(Document document, ExpressionStatementSyntax typeDecl, CancellationToken cancellationToken)
+        private async Task<Document> MakeBlockAsync(Document document,
+            ExpressionStatementSyntax trueStatement, CancellationToken cancellationToken)
         {
-            // Compute new uppercase name.
-            var identifierToken = typeDecl.Identifier;
-            var newName = identifierToken.Text.ToUpperInvariant();
+            var block = SyntaxFactory.Block(trueStatement);
 
-            // Get the symbol representing the type to be renamed.
-            var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
-            var typeSymbol = semanticModel.GetDeclaredSymbol(typeDecl, cancellationToken);
+            var root = await document.GetSyntaxRootAsync();
 
-            // Produce a new solution that has all references to that type renamed, including the declaration.
-            var originalSolution = document.Project.Solution;
-            var optionSet = originalSolution.Workspace.Options;
-            var newSolution = await Renamer.RenameSymbolAsync(document.Project.Solution, typeSymbol, newName, optionSet, cancellationToken).ConfigureAwait(false);
+            var newRoot = root.ReplaceNode((SyntaxNode)trueStatement, block);
 
-            // Return the new solution with the now-uppercase type name.
-            return newSolution;
+            var newDocument = document.WithSyntaxRoot(newRoot);
+            return newDocument;
         }
     }
 }
