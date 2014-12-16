@@ -42,7 +42,6 @@ namespace SampleCode
 
             if (b1)
                 Console.WriteLine(""b1"");
-
         }
     }
 }";

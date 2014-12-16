@@ -62,7 +62,8 @@ namespace IfClauseDiagnostic
             var openingTokenWithTrivia = SyntaxFactory.Token(SyntaxKind.OpenBraceToken).WithLeadingTrivia(statementLeadingWhiteSpace);
             var closingTokenWithTrivia = SyntaxFactory.Token(SyntaxKind.CloseBraceToken).WithLeadingTrivia(statementLeadingWhiteSpace);
 
-            var block = SyntaxFactory.Block(openingTokenWithTrivia, statements, closingTokenWithTrivia);
+            var block = SyntaxFactory.Block(openingTokenWithTrivia, statements, closingTokenWithTrivia)
+                .WithTrailingTrivia(endOfLineTrivia);
             
             // Replace the old statement with the block:
             var root = await document.GetSyntaxRootAsync();
