@@ -6,29 +6,27 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Rename;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.CodeAnalysis.CodeFixes;
+using Microsoft.CodeAnalysis.CodeActions;
 
 namespace IfClauseDiagnostic
 {
     [ExportCodeFixProvider("IfClauseDiagnosticCodeFixProvider", LanguageNames.CSharp), Shared]
     public class IfClauseDiagnosticCodeFixProvider : CodeFixProvider
     {
-        public sealed override ImmutableArray<string> GetFixableDiagnosticIds()
+        public sealed override ImmutableArray<string> FixableDiagnosticIds
         {
-            return ImmutableArray.Create(IfClauseDiagnosticAnalyzer.DiagnosticId);
+            get { return ImmutableArray.Create(IfClauseDiagnosticAnalyzer.DiagnosticId); }
         }
-
         public sealed override FixAllProvider GetFixAllProvider()
         {
             return WellKnownFixAllProviders.BatchFixer;
         }
 
-        public sealed override async Task ComputeFixesAsync(CodeFixContext context)
+        public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
         {
             var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
 
@@ -39,7 +37,7 @@ namespace IfClauseDiagnostic
             var statement = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<ExpressionStatementSyntax>().First();
 
             // Register a code action that will invoke the fix.
-            context.RegisterFix(
+            context.RegisterCodeFix(
                 CodeAction.Create("Make Block", c => MakeBlockAsync(context.Document, statement, c)),
                 diagnostic);
         }
@@ -50,7 +48,7 @@ namespace IfClauseDiagnostic
             // Create the important trivia that we need.
             var statementLeadingTrivia = trueStatement.GetLeadingTrivia();
             var statementLeadingWhiteSpace = trueStatement.Parent.GetLeadingTrivia()
-                .Where(t => t.CSharpKind() == SyntaxKind.WhitespaceTrivia).Single();
+                .Where(t => t.Kind() == SyntaxKind.WhitespaceTrivia).Single();
             var endOfLineTrivia = SyntaxFactory.EndOfLine("\r\n");
             var blockLeadingTrivia = statementLeadingTrivia.Insert(0, endOfLineTrivia);
 
